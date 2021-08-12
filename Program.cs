@@ -22,7 +22,7 @@ namespace bak
             }
             else if (rep == "backup")
             {
-                backUp();
+                backup();
             }
             else
             {
@@ -30,7 +30,7 @@ namespace bak
             }
             Console.ReadKey();
         }
-        static void backUp()
+        static void backup()
         {
             string connStr = "data source=.;user id=sa;password=ld123456a*;initial catalog=master";
             Console.WriteLine(string.Concat("默认连接字符串:", connStr));
