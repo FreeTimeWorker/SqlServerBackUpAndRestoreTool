@@ -189,14 +189,20 @@ namespace bak
                             var databaseName = headInfo[0].DatabaseName;
                             var dataName = fileInfo[0].LogicalName;
                             var logName = fileInfo[1].LogicalName;
-                            var stopConnect = $"ALTER DATABASE {databaseName} SET OFFLINE WITH ROLLBACK IMMEDIATE";
+                            //判断数据库是否存在
+                            var hasDataBaseSql = $"select count(1) From master.dbo.sysdatabases where name='{databaseName}'";
+                            var hasDataBase= context.SqlQuery<int>(hasDataBaseSql).First();
+                            if (hasDataBase == 1)
+                            {
+                                var stopConnect = $"ALTER DATABASE {databaseName} SET OFFLINE WITH ROLLBACK IMMEDIATE";
+                                context.SqlQuery<dynamic>(stopConnect);
+                            }
                             string restorSql = $@"RESTORE DATABASE {databaseName} from disk= N'{item}' 
                         WITH NOUNLOAD,
                         {(replace ? "REPLACE," : "")}
                             MOVE '{dataName}' TO '{Path.Combine(recoverDir, string.Concat(databaseName, ".mdf"))}',
                             MOVE '{logName}' TO '{Path.Combine(recoverDir, string.Concat(databaseName, ".ldf"))}';";
                             Console.WriteLine($"正在关闭数据{databaseName}的当前连接");
-                            context.SqlQuery<dynamic>(stopConnect);
                             Console.WriteLine($"正在还原{databaseName}");
                             context.SqlQuery<dynamic>(restorSql);
                             Console.WriteLine($"还原{databaseName}成功");
